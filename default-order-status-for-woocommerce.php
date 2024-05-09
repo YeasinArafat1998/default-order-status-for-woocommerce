@@ -1,28 +1,32 @@
 <?php
 /**
- * Plugin Name: Default Order Status for WooCommerce
+ * Plugin Name: Default Order Status
  * Description: Allows users to choose the default order status in WooCommerce.
  * Version: 1.0
  * Author: Yeasin Arafat
  * Author URI: https://www.linkedin.com/in/yeasin-arafat1998/
- * Text Domain: dosfw
+ * Text Domain: default-order-status
  */
 
+// Don't call the file directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
-function woocommerce_default_order_status_menu() {
+function default_order_status_menu() {
     add_menu_page(
-        __('Default Order Status', 'dosfw'),
-        __('WooCommerce Order Status', 'dosfw'),
+        esc_html__('Default Order Status', 'default-order-status'),
+        esc_html__('Order Status', 'default-order-status'),
         'manage_options',
         'default-order-status-settings',
-        'woocommerce_default_order_status_settings_page',
+        'default_order_status_settings_page',
         'dashicons-screenoptions'
     );
 }
-add_action('admin_menu', 'woocommerce_default_order_status_menu');
+add_action('admin_menu', 'default_order_status_menu');
 
 // Function to display the options page
-function woocommerce_default_order_status_settings_page() {
+function default_order_status_settings_page() {
     if (!current_user_can('manage_options')) {
         return;
     }
@@ -30,17 +34,18 @@ function woocommerce_default_order_status_settings_page() {
     // Get the current default order status option
     $default_order_status = get_option('default_order_status', 'completed');
     
-    // Handle form submission
-    if (isset($_POST['submit'])) {
+    // Handle form submission with nonce verification
+    if (isset($_POST['submit']) && isset($_POST['default_order_status_nonce']) && wp_verify_nonce($_POST['default_order_status_nonce'], 'default_order_status_nonce')) {
         $default_order_status = sanitize_text_field($_POST['default_order_status']);
         update_option('default_order_status', $default_order_status);
-        echo '<div class="updated"><p>' . __('Default order status updated.', 'dosfw') . '</p></div>';
+        echo '<div class="updated"><p>' . esc_html__('Default order status updated.', 'default-order-status') . '</p></div>';
     }
     ?>
     <div class="wrap">
-        <h2><?php _e('Default Order Status For WooCommerce', 'dosfw'); ?></h2>
+        <h2><?php esc_html_e('Default Order Status', 'default-order-status'); ?></h2>
         <form method="post" action="">
-            <label for="default_order_status"><?php _e('Select Default Order Status:', 'dosfw'); ?></label>
+            <?php wp_nonce_field('default_order_status_nonce', 'default_order_status_nonce'); ?>
+            <label for="default_order_status"><?php esc_html_e('Select Default Order Status:', 'default-order-status'); ?></label>
             <select name="default_order_status" id="default_order_status">
                 <?php
                 // Get a list of WooCommerce order statuses
@@ -51,7 +56,7 @@ function woocommerce_default_order_status_settings_page() {
                 ?>
             </select>
             <p class="submit">
-                <input type="submit" name="submit" id="submit" class="button button-primary" value="<?php _e('Save Changes', 'dosfw'); ?>">
+                <input type="submit" name="submit" id="submit" class="button button-primary" value="<?php esc_attr_e('Save Changes', 'default-order-status'); ?>">
             </p>
         </form>
     </div>
